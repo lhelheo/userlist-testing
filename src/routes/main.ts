@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { createUser, createUsers, deleteUser, getAllUsers, getUserByEmail, updateUser } from '../services/user';
+import { createClient } from '../services/client';
 
 export const mainRouter = Router();
 
@@ -53,4 +54,23 @@ mainRouter.put("/user", async (req, res) => {
 mainRouter.delete("/user", async (req, res) => {
     const result = await deleteUser();
     res.json({ result });
+})
+
+mainRouter.post("/client", async (req, res) => {
+    const client = await createClient({
+        name: "client",
+        email: "leonardo@gmail.com",
+        posts: {
+            create: {
+                title: "Post do client",
+                body: "Corpo de client"
+            }
+        }
+    })
+    if (client) {
+        res.status(201).json({ client });
+    }
+    else {
+        res.status(500).json({ error: "Error email already exists" });
+    }
 })

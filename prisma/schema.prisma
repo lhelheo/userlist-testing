@@ -24,6 +24,7 @@ model User {
   updated_at DateTime @default(now()) @updatedAt
   role Role @default(USER)
   name String
+  subtitle String?
   email String @unique
   posts Post[]
 
@@ -41,14 +42,22 @@ model Post {
   @@map("posts")
 }
 
+model Client {
+  id Int @id @default(autoincrement())
+  name String
+  phone String?
+  email String?
+  product Product[] 
+
+  @@map("clients")
+}
+
 model Product {
   id Int @id @default(autoincrement())
   name String
   price Float
-  description String?
-  image String?
-  created_at DateTime @default(now())
-  updated_at DateTime @default(now()) @updatedAt
+  clientID Int
+  client Client @relation(fields: [clientID], references: [id])
 
   @@map("products")
 }

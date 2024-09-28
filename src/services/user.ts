@@ -1,6 +1,13 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "../libs/prisma";
 
+// export const createClient = async (data: Prisma.UserCreateInput) => {
+//     const result = await prisma...create({
+//         data
+//     })
+//     return result;
+// }
+
 export const createUser = async (data: Prisma.UserCreateInput) => {
     const result = await prisma.user.upsert({
         where: {
