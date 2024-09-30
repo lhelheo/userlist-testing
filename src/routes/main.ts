@@ -1,76 +1,86 @@
-import { Router } from 'express';
-import { createUser, createUsers, deleteUser, getAllUsers, getUserByEmail, updateUser } from '../services/user';
-import { createClient } from '../services/client';
+import { Router } from "express";
+import { prisma } from "../libs/prisma";
 
 export const mainRouter = Router();
 
-mainRouter.get('/ping', (req, res) => {
-    res.json({ pong: true });
-});
-
-mainRouter.get("/test", (req, res) => {
-    res.json({ testado: true });
-});
-
-mainRouter.post("/user", async (req, res) => {
-    const user = await createUser({
-        name: "teste2",
-        email: "teste2@gmail.com",
-        posts: {
-            create: {
-                title: "Post do Teste2",
-                body: "Corpo de teste"
-            }
-        }
-    })
-    if (user) {
-        res.status(201).json({ user });
-    }
-    else {
-        res.status(500).json({ error: "Error email already exists" });
-    }
-})
-
-mainRouter.post("/users", async (req, res) => {
-    const result = await createUsers([]);
-    res.json({ result });
-})
-
-mainRouter.get("/users", async (req, res) => {
-    const result = await getAllUsers();
-    res.json({ result });
-})
-
-mainRouter.get("/user", async (req, res) => {
-    const result = await getUserByEmail("leonardo@gmail.com");
-    res.json({ result });
-})
-
-mainRouter.put("/user", async (req, res) => {
-    const result = await updateUser();
-    res.json({ result });
-})
-
-mainRouter.delete("/user", async (req, res) => {
-    const result = await deleteUser();
-    res.json({ result });
+mainRouter.get("/", (req, res) => {
+    res.json("Hello, world!");
 })
 
 mainRouter.post("/client", async (req, res) => {
-    const client = await createClient({
-        name: "client",
-        email: "leonardo@gmail.com",
-        posts: {
-            create: {
-                title: "Post do client",
-                body: "Corpo de client"
+    if (!req.body.name || !req.body.email || !req.body.phone) {
+        return res.status(400).json({ error: "Missing required fields" });
+    }
+    try {
+        const existingClient = await prisma.client.findFirst({
+            where: { name: req.body.name }
+        })
+        if (existingClient) {
+            return res.status(400).json({ error: "Client already exists" });
+        }
+        const user = await prisma.client.create({
+            data: {
+                name: req.body.name,
+                email: req.body.email,
+                phone: req.body.phone,
+            }
+        });
+        if (req.body.productName && req.body.productPrice) {
+            await prisma.product.create({
+                data: {
+                    name: req.body.productName,
+                    price: req.body.productPrice,
+                    clientID: user.id
+                }
+            });
+        }
+        res.json({ user });
+    } catch (error) {
+        res.status(500).json({ error: "Failed to create client or product" });
+    }
+});
+
+mainRouter.get("/client", async (req, res) => {
+    const users = await prisma.client.findMany();
+    res.json(users);
+})
+
+mainRouter.delete("/client/:id", async (req, res) => {
+    const { id } = req.params;
+    const user = await prisma.client.delete({
+        where: {
+            id: Number(id)
+        }
+    })
+
+    res.json(user);
+})
+
+// mainRouter.put("/client", async (req, res) => {
+//     const result = await updateClient(Number(req.body.id), {
+//         name: req.body.name,
+//         email: req.body.email
+//     })
+//     res.json({result});
+// })
+
+// get all products
+mainRouter.get("/product", async (req, res) => {
+    const products = await prisma.product.findMany();
+    res.json(products);
+})
+
+// create a product
+mainRouter.post("/product", async (req, res) => {
+    const product = await prisma.product.create({
+        data: {
+            name: req.body.name,
+            price: req.body.price,
+            client: {
+                connect: { id: req.body.clientId }
             }
         }
     })
-    if (client) {
-        res.status(201).json({ client });
-    }
-    else {
-        res.status(500).json({ error: "Error email already exists" });
-    }
+
+    res.json(product);
 })
