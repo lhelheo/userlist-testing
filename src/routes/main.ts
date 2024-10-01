@@ -41,11 +41,15 @@ mainRouter.post("/client", async (req, res) => {
     }
 });
 
-// Get all clients
+// Get all clients - showing all products
 mainRouter.get("/client", async (req, res) => {
-    const users = await prisma.client.findMany();
-    res.json(users);
-})
+    const clients = await prisma.client.findMany({
+        include: {
+            product: true
+        }
+    });
+    res.json(clients);
+});
 
 // Delete client by id
 mainRouter.delete("/client/:id", async (req, res) => {
