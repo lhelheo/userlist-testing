@@ -1,53 +1,20 @@
 import { Router } from "express";
 import { prisma } from "../libs/prisma";
+import { createClient, getAllClients, getAllProducts } from "../services/client";
 
 export const mainRouter = Router();
 
+// Test
 mainRouter.get("/", (req, res) => {
     res.json("Hello, world!");
 })
 
 // Post one client
-mainRouter.post("/client", async (req, res) => {
-    if (!req.body.name || !req.body.email || !req.body.phone) {
-        return res.status(400).json({ error: "Missing required fields" });
-    }
-    try {
-        const existingClient = await prisma.client.findFirst({
-            where: { name: req.body.name }
-        })
-        if (existingClient) {
-            return res.status(400).json({ error: "Client already exists" });
-        }
-        const user = await prisma.client.create({
-            data: {
-                name: req.body.name,
-                email: req.body.email,
-                phone: req.body.phone,
-            }
-        });
-        if (req.body.productName && req.body.productPrice) {
-            await prisma.product.create({
-                data: {
-                    name: req.body.productName,
-                    price: req.body.productPrice,
-                    clientID: user.id
-                }
-            });
-        }
-        res.json({ user });
-    } catch (error) {
-        res.status(500).json({ error: "Failed to create client or product" });
-    }
-});
+mainRouter.post("/client", createClient);
 
 // Get all clients - showing all products
 mainRouter.get("/client", async (req, res) => {
-    const clients = await prisma.client.findMany({
-        include: {
-            product: true
-        }
-    });
+    const clients = await getAllClients();
     res.json(clients);
 });
 
@@ -99,17 +66,9 @@ mainRouter.post("/client/:id/product", async (req, res) => {
     res.json(product);
 })
 
-// mainRouter.put("/client", async (req, res) => {
-//     const result = await updateClient(Number(req.body.id), {
-//         name: req.body.name,
-//         email: req.body.email
-//     })
-//     res.json({result});
-// })
-
 // Get all Products
 mainRouter.get("/product", async (req, res) => {
-    const products = await prisma.product.findMany();
+    const products = await getAllProducts();
     res.json(products);
 })
 
@@ -124,6 +83,5 @@ mainRouter.post("/product", async (req, res) => {
             }
         }
     })
-
     res.json(product);
 })
