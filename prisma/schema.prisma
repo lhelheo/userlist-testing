@@ -55,6 +55,7 @@ model Client {
 model Product {
   id Int @id @default(autoincrement())
   name String
+  product_code String?
   price Float
   clientID Int
   client Client @relation(fields: [clientID], references: [id])
