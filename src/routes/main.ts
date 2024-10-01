@@ -50,33 +50,20 @@ mainRouter.get("/client", async (req, res) => {
 // Delete client by id
 mainRouter.delete("/client/:id", async (req, res) => {
     const { id } = req.params;
-    const user = await prisma.client.delete({
-        where: {
-            id: Number(id)
-        }
-    })
-
-    res.json(user);
-})
-
-// Delete client by name
-mainRouter.delete("/client", async (req, res) => {
-    if (!req.body.name) {
-        return res.status(400).json({ error: "Name is required" });
-    }
-
     try {
-        const deletedUser = await prisma.client.deleteMany({
-            where: {
-                name: req.body.name
-            }
+        const client = await prisma.client.findUnique({
+            where: { id: Number(id) }
         });
 
-        if (deletedUser.count === 0) {
+        if (!client) {
             return res.status(404).json({ error: "Client not found" });
         }
 
-        res.json({ message: "Client deleted successfully", deletedCount: deletedUser.count });
+        await prisma.client.delete({
+            where: { id: Number(id) }
+        });
+
+        res.json({ message: "Client deleted successfully" });
     } catch (error) {
         res.status(500).json({ error: "Failed to delete client" });
     }
