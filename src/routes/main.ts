@@ -1,12 +1,6 @@
 import { Router } from "express";
-import { 
-    addProductToClient, 
-    createOneClient, 
-    createOneProduct,
-    deleteOneClient,
-    getAllClients,
-    getAllProducts
-} from "../services/main";
+import { createOneClient, deleteOneClient, getAllClients } from "../services/client";
+import { addProductToClient, createOneProduct, getAllProducts } from "../services/product";
 
 export const mainRouter = Router();
 
