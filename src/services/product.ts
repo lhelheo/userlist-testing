@@ -48,3 +48,32 @@ export const getAllProducts = async () => {
     const products = await prisma.product.findMany();
     return products;
 }
+
+export const deleteOneProduct = async (req: any, res: any) => {
+    const { id } = req.params;
+    try {
+        await prisma.product.delete({
+            where: { id: Number(id) }
+        });
+        res.json({ message: "Product deleted successfully" });
+    } catch (error) {
+        res.status(500).json({ error: "Failed to delete product" });
+    }
+}
+
+export const editOneProduct = async (req: any, res: any) => {
+    const { id } = req.params;
+    try {
+        const product = await prisma.product.update({
+            where: { id: Number(id) },
+            data: {
+                name: req.body.name,
+                price: req.body.price,
+                product_code: req.body.productCode
+            }
+        });
+        res.json(product);
+    } catch (error) {
+        res.status(500).json({ error: "Failed to edit product" });
+    }
+}
