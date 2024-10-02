@@ -48,7 +48,7 @@ export const createOneClient = async (req: any, res: any) => {
         });
 
         if (existingClient) {
-            return res.status(400).json({ error: "Client already exists" });
+            return res.status(400).json({ error: "Cliente já criado já existe" });
         }
 
         const user = await prisma.client.create({
