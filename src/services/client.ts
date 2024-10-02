@@ -76,3 +76,28 @@ export const createOneClient = async (req: any, res: any) => {
     }
 };
 
+export const editOneClient = async (req: any, res: any) => {
+    const { id } = req.params;
+    try {
+        const client = await prisma.client.findUnique({
+            where: { id: Number(id) }
+        });
+
+        if (!client) {
+            return res.status(404).json({ error: "Client not found" });
+        }
+
+        const updatedClient = await prisma.client.update({
+            where: { id: Number(id) },
+            data: {
+                name: req.body.name,
+                email: req.body.email,
+                phone: req.body.phone
+            }
+        });
+
+        res.json(updatedClient);
+    } catch (error) {
+        res.status(500).json({ error: "Failed to update client" });
+    }
+}

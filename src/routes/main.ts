@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createOneClient, deleteOneClient, getAllClients } from "../services/client";
+import { createOneClient, deleteOneClient, editOneClient, getAllClients } from "../services/client";
 import { addProductToClient, createOneProduct, deleteOneProduct, editOneProduct, getAllProducts } from "../services/product";
 
 export const mainRouter = Router();
@@ -25,3 +25,4 @@ mainRouter.get("/product", async (req, res) => {
 mainRouter.post("/product", createOneProduct);
 mainRouter.delete("/product/:id", deleteOneProduct);
 mainRouter.put("/product/:id", editOneProduct);
+mainRouter.put("/product/:id/client", editOneClient);
