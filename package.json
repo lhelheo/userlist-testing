@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "start": "node src/server.ts"
+    "start": "node src/server.ts",
+    "vercel-build": "npx prisma migrate deploy"
   },
   "engines": {
     "node": "16.x"
