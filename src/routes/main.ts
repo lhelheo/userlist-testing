@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { createOneClient, deleteOneClient, editOneClient, getAllClients } from "../services/client";
-import { addProductToClient, createOneProduct, deleteOneProduct, editOneProduct, getAllProducts } from "../services/product";
+import { createClient, deleteClient, editClient, getAllClients } from "../services/client";
+import { addProduct, createProduct, deleteProduct, editProduct, getAllProducts } from "../services/product";
 import { prisma } from "../libs/prisma";
 
 export const mainRouter = Router();
@@ -8,25 +8,21 @@ export const mainRouter = Router();
 mainRouter.get("/", (req, res) => {
     res.json("Hello, world!");
 })
-
-mainRouter.post("/client", createOneClient);
-mainRouter.get("/client", async (req, res) => {
+mainRouter.post("/client", createClient);
+mainRouter.get("/clients", async (req, res) => {
     const clients = await getAllClients();
     res.json(clients);
 });
-
-mainRouter.delete("/client/:id", deleteOneClient);
-mainRouter.post("/client/:id/product", addProductToClient);
-
-mainRouter.get("/product", async (req, res) => {
+mainRouter.delete("/client/:id", deleteClient);
+mainRouter.post("/client/:id/product", addProduct);
+mainRouter.get("/products", async (req, res) => {
     const products = await getAllProducts();
     res.json(products);
 })
-
-mainRouter.post("/product", createOneProduct);
-mainRouter.delete("/product/:id", deleteOneProduct);
-mainRouter.put("/product/:id", editOneProduct);
-mainRouter.put("/product/:id/client", editOneClient);
+mainRouter.post("/product", createProduct);
+mainRouter.delete("/product/:id", deleteProduct);
+mainRouter.put("/product/:id", editProduct);
+mainRouter.put("/product/:id/client", editClient);
 mainRouter.get("/client/:id", async (req, res) => {
     const client = await prisma.client.findUnique({
         where: { id: Number(req.params.id) },

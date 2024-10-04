@@ -9,7 +9,7 @@ export const getAllClients = async () => {
     return clients;
 }
 
-export const deleteOneClient = async (req: any, res: any) => {
+export const deleteClient = async (req: any, res: any) => {
     const { id } = req.params;
     try {
         const client = await prisma.client.findUnique({
@@ -37,7 +37,7 @@ export const deleteOneClient = async (req: any, res: any) => {
     }
 }
 
-export const createOneClient = async (req: any, res: any) => {
+export const createClient = async (req: any, res: any) => {
     if (!req.body.name || !req.body.email || !req.body.phone) {
         return res.status(400).json({ error: "Missing required fields" });
     }
@@ -76,7 +76,7 @@ export const createOneClient = async (req: any, res: any) => {
     }
 };
 
-export const editOneClient = async (req: any, res: any) => {
+export const editClient = async (req: any, res: any) => {
     const { id } = req.params;
     try {
         const client = await prisma.client.findUnique({

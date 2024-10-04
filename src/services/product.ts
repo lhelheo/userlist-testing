@@ -1,6 +1,6 @@
 import { prisma } from "../libs/prisma";
 
-export const addProductToClient = async (req: any, res: any) => {
+export const addProduct = async (req: any, res: any) => {
     const { id } = req.params;
 
     try {
@@ -31,7 +31,7 @@ export const addProductToClient = async (req: any, res: any) => {
     }
 };
 
-export const createOneProduct = async (req: any, res: any) => {
+export const createProduct = async (req: any, res: any) => {
     const product = await prisma.product.create({
         data: {
             name: req.body.name,
@@ -49,7 +49,7 @@ export const getAllProducts = async () => {
     return products;
 }
 
-export const deleteOneProduct = async (req: any, res: any) => {
+export const deleteProduct = async (req: any, res: any) => {
     const { id } = req.params;
     try {
         await prisma.product.delete({
@@ -61,7 +61,7 @@ export const deleteOneProduct = async (req: any, res: any) => {
     }
 }
 
-export const editOneProduct = async (req: any, res: any) => {
+export const editProduct = async (req: any, res: any) => {
     const { id } = req.params;
     try {
         const product = await prisma.product.update({
