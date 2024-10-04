@@ -1,12 +1,5 @@
 import { prisma } from "../libs/prisma";
 
-export const getOneClient = async (id: number) => {
-    const client = await prisma.client.findUnique({
-        where: { id }
-    });
-    return client;
-}
-
 export const getAllClients = async () => {
     const clients = await prisma.client.findMany({
         include: {
