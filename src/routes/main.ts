@@ -2,6 +2,7 @@ import { Router } from "express";
 import { createClient, deleteClient, editClient, getAllClients } from "../services/client";
 import { addProduct, createProduct, deleteProduct, editProduct, getAllProducts } from "../services/product";
 import { prisma } from "../libs/prisma";
+import { register } from "../controllers/apiController";
 
 export const mainRouter = Router();
 
@@ -30,3 +31,4 @@ mainRouter.get("/client/:id", async (req, res) => {
     });
     res.json(client);
 });
+mainRouter.post("/register", register);
