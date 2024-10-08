@@ -2,7 +2,8 @@ import { Router } from "express";
 import { createClient, deleteClient, editClient, getAllClients } from "../services/client";
 import { addProduct, createProduct, deleteProduct, editProduct, getAllProducts } from "../services/product";
 import { prisma } from "../libs/prisma";
-import { list, login, register } from "../controllers/apiController";
+import { list, login, register } from "../controllers/api";
+import { auth } from "../middlewares/auth";
 
 export const mainRouter = Router();
 
@@ -33,4 +34,4 @@ mainRouter.get("/client/:id", async (req, res) => {
 });
 mainRouter.post("/register", register);
 mainRouter.post("/login", login);
-mainRouter.get("/list", list);
+mainRouter.get("/list", auth.private, list); // This route is protected by the auth middleware
