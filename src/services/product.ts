@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { prisma } from "../libs/prisma";
 import { Request, Response } from "express";
 
@@ -81,7 +82,6 @@ export const deleteProduct = async (req: Request, res: Response) => {
 export const editProduct = async (req: Request, res: Response) => {
     const { id } = req.params;
 
-    // Extraindo os campos necessários do corpo da requisição
     const {
         name,
         price,
@@ -92,7 +92,6 @@ export const editProduct = async (req: Request, res: Response) => {
         status,
     } = req.body;
 
-    // Validação básica dos dados
     if (!name || price === undefined || !product_code) {
         return res.status(400).json({ error: "Nome, preço e código do produto são obrigatórios." });
     }
@@ -102,19 +101,18 @@ export const editProduct = async (req: Request, res: Response) => {
             where: { id: Number(id) },
             data: {
                 name,
-                price: parseFloat(price), // Garantindo que o preço seja um número
-                description: description || null, // Permite valores nulos
-                product_code: product_code || null, // Permite valores nulos
-                cost_price: cost_price ? parseFloat(cost_price) : null, // Permite valores nulos
-                supplier: supplier || null, // Permite valores nulos
-                status: status || 'Disponível', // Default para 'Disponível' se não for informado
+                price: parseFloat(price),
+                description: description || null,
+                product_code: product_code || null,
+                cost_price: cost_price ? parseFloat(cost_price) : undefined,
+                supplier: supplier || null,
+                status: status || 'Disponível', 
             }
         });
 
         res.json(product);
     } catch (error) {
         console.error('Error editing product:', error);
-        // Tratamento de erro mais específico
         if (error instanceof Prisma.PrismaClientKnownRequestError) {
             if (error.code === 'P2025') {
                 return res.status(404).json({ error: "Produto não encontrado." });
