@@ -16,6 +16,9 @@ export const addProduct = async (req: any, res: any) => {
 
         const product = await prisma.product.create({
             data: {
+                user: {
+                    connect: { id: user.id }
+                },
                 name: req.body.name,
                 price: req.body.price,
                 product_code: req.body.productCode,
