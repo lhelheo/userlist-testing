@@ -17,8 +17,15 @@ export const addProduct = async (req: Request, res: Response) => {
             data: {
                 name: req.body.name,
                 price: req.body.price,
+                cost_price: req.body.cost_price,
+                product_code: req.body.productCode,
+                supplier: req.body.supplier,
+                status: req.body.status,
                 client: {
                     connect: { id: Number(id) }
+                },
+                user: {
+                    connect: { id: req.body.userID || 1 } 
                 }
             }
         });
@@ -27,7 +34,7 @@ export const addProduct = async (req: Request, res: Response) => {
     } catch (error) {
         res.status(500).json({ error: "Failed to add product" });
     }
-}
+};
 
 export const createProduct = async (req: Request, res: Response) => {
     const product = await prisma.product.create({
@@ -82,7 +89,7 @@ export const editProduct = async (req: Request, res: Response) => {
                 price,
                 product_code: productCode || null, 
                 clientID: Number(clientID),        
-                userID: Number(userID)             
+                userID: Number(userID)           
             }
         });
 
