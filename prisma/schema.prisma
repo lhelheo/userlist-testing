@@ -51,5 +51,8 @@ model Product {
   userID Int @default(1)
   user User @relation(fields: [userID], references: [id])
 
+  updateAt DateTime @default(now())
+  createAt DateTime @default(now())
+
   @@map("products")
 }
