@@ -80,23 +80,46 @@ export const deleteProduct = async (req: Request, res: Response) => {
 
 export const editProduct = async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { name, price, productCode, clientID, userID } = req.body;
+
+    // Extraindo os campos necessários do corpo da requisição
+    const {
+        name,
+        price,
+        description,
+        product_code,
+        cost_price,
+        supplier,
+        status,
+    } = req.body;
+
+    // Validação básica dos dados
+    if (!name || price === undefined || !product_code) {
+        return res.status(400).json({ error: "Nome, preço e código do produto são obrigatórios." });
+    }
 
     try {
         const product = await prisma.product.update({
             where: { id: Number(id) },
             data: {
                 name,
-                price,
-                product_code: productCode || null, 
-                clientID: Number(clientID),        
-                userID: Number(userID)           
+                price: parseFloat(price), // Garantindo que o preço seja um número
+                description: description || null, // Permite valores nulos
+                product_code: product_code || null, // Permite valores nulos
+                cost_price: cost_price ? parseFloat(cost_price) : null, // Permite valores nulos
+                supplier: supplier || null, // Permite valores nulos
+                status: status || 'Disponível', // Default para 'Disponível' se não for informado
             }
         });
 
         res.json(product);
     } catch (error) {
         console.error('Error editing product:', error);
-        res.status(500).json({ error: "Failed to edit product" });
+        // Tratamento de erro mais específico
+        if (error instanceof Prisma.PrismaClientKnownRequestError) {
+            if (error.code === 'P2025') {
+                return res.status(404).json({ error: "Produto não encontrado." });
+            }
+        }
+        res.status(500).json({ error: "Falha ao editar o produto" });
     }
 };
