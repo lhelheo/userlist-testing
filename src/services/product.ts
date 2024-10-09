@@ -1,38 +1,32 @@
 import { prisma } from "../libs/prisma";
 
+// add product to a auth user
 export const addProduct = async (req: any, res: any) => {
     const { id } = req.params;
-
     try {
-        const user = await prisma.client.findUnique({
-            where: {
-                id: Number(id)
-            }
+        const client = await prisma.client.findUnique({
+            where: { id: Number(id) }
         });
 
-        if (!user) {
+        if (!client) {
             return res.status(404).json({ error: "Client not found" });
         }
 
         const product = await prisma.product.create({
             data: {
-                user: {
-                    connect: { id: user.id }
-                },
                 name: req.body.name,
                 price: req.body.price,
-                product_code: req.body.productCode,
                 client: {
-                    connect: { id: user.id }
+                    connect: { id: Number(id) }
                 }
             }
         });
 
         res.json(product);
     } catch (error) {
-        res.status(500).json({ error: "Failed to add product to client" });
+        res.status(500).json({ error: "Failed to add product" });
     }
-};
+}
 
 export const createProduct = async (req: any, res: any) => {
     const product = await prisma.product.create({
@@ -47,8 +41,11 @@ export const createProduct = async (req: any, res: any) => {
     return product;
 }
 
+// get all products from user auth
 export const getAllProducts = async () => {
-    const products = await prisma.product.findMany();
+    const products = await prisma.product.findMany({
+        include: { client: true }
+    });
     return products;
 }
 
