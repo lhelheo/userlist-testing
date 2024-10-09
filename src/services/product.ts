@@ -21,6 +21,7 @@ export const addProduct = async (req: Request, res: Response) => {
                 product_code: req.body.productCode,
                 supplier: req.body.supplier,
                 status: req.body.status,
+                description: req.body.description,
                 client: {
                     connect: { id: Number(id) }
                 },
