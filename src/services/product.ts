@@ -1,7 +1,8 @@
 import { prisma } from "../libs/prisma";
+import { Request, Response } from "express";
 
 // add product to a auth user
-export const addProduct = async (req: any, res: any) => {
+export const addProduct = async (req: Request, res: Response) => {
     const { id } = req.params;
     try {
         const client = await prisma.client.findUnique({
@@ -28,7 +29,7 @@ export const addProduct = async (req: any, res: any) => {
     }
 }
 
-export const createProduct = async (req: any, res: any) => {
+export const createProduct = async (req: Request, res: Response) => {
     const product = await prisma.product.create({
         data: {
             name: req.body.name,
@@ -49,7 +50,15 @@ export const getAllProducts = async () => {
     return products;
 }
 
-export const deleteProduct = async (req: any, res: any) => {
+export const getOneProduct = async (req: Request, res: Response) => {
+    const product = await prisma.product.findUnique({
+        where: { id: Number(req.params.id) },
+        include: { client: true }
+    });
+    res.json(product);
+}
+
+export const deleteProduct = async (req: Request, res: Response) => {
     const { id } = req.params;
     try {
         await prisma.product.delete({
@@ -61,19 +70,25 @@ export const deleteProduct = async (req: any, res: any) => {
     }
 }
 
-export const editProduct = async (req: any, res: any) => {
+export const editProduct = async (req: Request, res: Response) => {
     const { id } = req.params;
+    const { name, price, productCode, clientID, userID } = req.body;
+
     try {
         const product = await prisma.product.update({
             where: { id: Number(id) },
             data: {
-                name: req.body.name,
-                price: req.body.price,
-                product_code: req.body.productCode
+                name,
+                price,
+                product_code: productCode || null, 
+                clientID: Number(clientID),        
+                userID: Number(userID)             
             }
         });
+
         res.json(product);
     } catch (error) {
+        console.error('Error editing product:', error);
         res.status(500).json({ error: "Failed to edit product" });
     }
-}
+};

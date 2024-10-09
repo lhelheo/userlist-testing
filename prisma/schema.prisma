@@ -44,8 +44,12 @@ model Client {
 model Product {
   id Int @id @default(autoincrement())
   name String
+  status String @default("Disponivel")
+  supplier String @default("Não informado")
+  description String?
   product_code String?
   price Float
+  cost_price Float @default(0)
   clientID Int 
   client Client @relation(fields: [clientID], references: [id])
   userID Int @default(1)

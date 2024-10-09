@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { createClient, deleteClient, editClient, getAllClients } from "../services/client";
-import { addProduct, createProduct, deleteProduct, editProduct, getAllProducts } from "../services/product";
+import { addProduct, createProduct, deleteProduct, editProduct, getAllProducts, getOneProduct } from "../services/product";
 import { prisma } from "../libs/prisma";
 import { list, login, register } from "../controllers/api";
 import { auth } from "../middlewares/auth";
@@ -32,6 +32,7 @@ mainRouter.get("/client/:id", async (req, res) => {
     });
     res.json(client);
 });
+mainRouter.get("/product/:id", getOneProduct);
 mainRouter.post("/register", register);
 mainRouter.post("/login", login);
 mainRouter.get("/list", auth.private, list); // This route is protected by the auth middleware
