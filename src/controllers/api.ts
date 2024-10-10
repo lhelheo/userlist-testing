@@ -30,31 +30,39 @@ export const register = async (req: any, res: any) => {
     }
     return res.status(400).json({ message: "Invalid data" });
 }
+
 export const login = async (req: any, res: any) => {
-    if (req.body.username  && req.body.password) {
+    if (req.body.username && req.body.password) {
         let { username, password } = req.body;
+
         let user = await prisma.user.findUnique({
             where: {
                 username,
             },
         });
+
         if (user) {
             if (user.password === password) {
                 const token = JWT.sign(
                     { id: user.id, username: user.username },
                     process.env.JWT_SECRET as string,
                     { expiresIn: "1h" }
-                )
-                res.status(200).json({ status: true, token });
+                );
+                // Retorna a resposta e encerra a execução
+                return res.status(200).json({ status: true, token });
             } else {
-                res.status(401).json({ message: "Invalid credentials" });
+                // Retorna a resposta e encerra a execução
+                return res.status(401).json({ message: "Invalid credentials" });
             }
         } else {
-            res.status(404).json({ message: "User not found" });
+            // Retorna a resposta e encerra a execução
+            return res.status(404).json({ message: "User not found" });
         }
     }
-    res.json({ status: false });
-}
+    // Retorna a resposta caso os dados estejam faltando ou sejam inválidos
+    return res.status(400).json({ status: false, message: "Invalid data" });
+};
+
 export const list = async (req: any, res: any) => {
     const users = await prisma.user.findMany();
     res.json(users);
