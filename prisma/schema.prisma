@@ -30,7 +30,7 @@ model Client {
   email String?
   userID Int @default(1)
   user User @relation(fields: [userID], references: [id])
-  products ClientProduct[]
+  product Product[] 
 
   @@map("clients")
 }
@@ -44,22 +44,13 @@ model Product {
   product_code String?
   price Float
   cost_price Float @default(0)
+  clientID Int 
+  client Client @relation(fields: [clientID], references: [id])
   userID Int @default(1)
   user User @relation(fields: [userID], references: [id])
-  clients ClientProduct[]
 
   updateAt DateTime @default(now())
   createAt DateTime @default(now())
 
   @@map("products")
-}
-
-model ClientProduct {
-  clientID Int
-  productID Int
-  client Client @relation(fields: [clientID], references: [id], onDelete: Cascade)
-  product Product @relation(fields: [productID], references: [id], onDelete: Cascade)
-
-  @@id([clientID, productID])
-  @@map("clients_products")
 }
