@@ -1,7 +1,8 @@
 import { prisma } from "../libs/prisma";
 import JWT from "jsonwebtoken";
+import { Request, Response } from "express";
 
-export const register = async (req: any, res: any) => {
+export const register = async (req: Request, res: Response) => {
     if (req.body.username && req.body.password) {
         let { username, password } = req.body;
         
@@ -31,7 +32,7 @@ export const register = async (req: any, res: any) => {
     return res.status(400).json({ message: "Invalid data" });
 }
 
-export const login = async (req: any, res: any) => {
+export const login = async (req: Request, res: Response) => {
     if (req.body.username && req.body.password) {
         let { username, password } = req.body;
 
@@ -59,12 +60,12 @@ export const login = async (req: any, res: any) => {
     return res.status(400).json({ status: false, message: "Invalid data" });
 };
 
-export const list = async (req: any, res: any) => {
+export const list = async (req: Request, res: Response) => {
     const users = await prisma.user.findMany();
     res.json(users);
 }
 
-export const deleteUserByUsername = async (req: any, res: any) => {
+export const deleteUserByUsername = async (req: Request, res: Response) => {
     const { username } = req.params;
     const user = await prisma.user.delete({
         where: {
