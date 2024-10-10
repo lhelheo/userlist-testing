@@ -1,8 +1,5 @@
 import { prisma } from "../libs/prisma";
 import JWT from "jsonwebtoken";
-import dotenv from "dotenv";
-
-dotenv.config();
 
 export const register = async (req: any, res: any) => {
     const { username, password } = req.body;
