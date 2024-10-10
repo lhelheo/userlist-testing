@@ -45,30 +45,40 @@ export const register = async (req: any, res: any) => {
 };
 
 export const login = async (req: any, res: any) => {
-    if (req.body.username && req.body.password) {
-        let { username, password } = req.body;
-        let user = await prisma.user.findUnique({
-            where: {
-                username,
-            },
+    const { username, password } = req.body;
+
+    if (!username || !password) {
+        return res.status(400).json({ status: false, message: "Missing credentials" });
+    }
+
+    try {
+        const user = await prisma.user.findUnique({
+            where: { username },
         });
 
-        if (user) {
-            if (user.password === password) {
-                const token = JWT.sign(
-                    { id: user.id, username: user.username },
-                    process.env.JWT_SECRET as string,
-                    { expiresIn: "1h" }
-                );
-                return res.status(200).json({ status: true, token });  
-            } else {
-                return res.status(401).json({ message: "Invalid credentials" }); 
-            }
-        } else {
-            return res.status(404).json({ message: "User not found" }); 
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
         }
+
+        if (user.password !== password) {
+            return res.status(401).json({ message: "Invalid credentials" });
+        }
+
+        const token = JWT.sign(
+            { id: user.id, username: user.username },
+            process.env.JWT_SECRET as string,
+            { expiresIn: "1h" }
+        );
+
+        return res.status(200).json({ status: true, token });
+    } catch (error) {
+        if (error instanceof Error) {
+            console.error("Error during login:", error.message);
+        } else {
+            console.error("Error during login:", error);
+        }
+        return res.status(500).json({ message: "Internal server error" });
     }
-    return res.status(400).json({ status: false, message: "Missing credentials" });  
 };
 
 
