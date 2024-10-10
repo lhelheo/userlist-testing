@@ -48,22 +48,28 @@ export const login = async (req: any, res: any) => {
                     process.env.JWT_SECRET as string,
                     { expiresIn: "1h" }
                 );
-                // Retorna a resposta e encerra a execução
                 return res.status(200).json({ status: true, token });
             } else {
-                // Retorna a resposta e encerra a execução
                 return res.status(401).json({ message: "Invalid credentials" });
             }
         } else {
-            // Retorna a resposta e encerra a execução
             return res.status(404).json({ message: "User not found" });
         }
     }
-    // Retorna a resposta caso os dados estejam faltando ou sejam inválidos
     return res.status(400).json({ status: false, message: "Invalid data" });
 };
 
 export const list = async (req: any, res: any) => {
     const users = await prisma.user.findMany();
     res.json(users);
+}
+
+export const deleteUserByUsername = async (req: any, res: any) => {
+    const { username } = req.params;
+    const user = await prisma.user.delete({
+        where: {
+            username,
+        },
+    });
+    res.json(user);
 }
