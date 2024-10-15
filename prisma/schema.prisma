@@ -13,50 +13,40 @@ enum Role {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  username  String   @unique @default("")
-  password  String   @default("")
-  role      Role     @default(USER)
-  clients   Client[]
-  products  Product[]
-
-  createAt  DateTime @default(now())
-  updateAt  DateTime @updatedAt // Utilizando @updatedAt para atualização automática do timestamp
-
+  id Int @id @default(autoincrement())
+  username String @unique @default("")
+  password String @default("")
+  role Role @default(USER)
+  clients Client[]
+  products Product[]
   @@map("users")
 }
 
 model Client {
-  id        Int      @id @default(autoincrement())
-  name      String
-  phone     String?
-  email     String?
-  userID    Int
-  user      User     @relation(fields: [userID], references: [id])
-  products  Product[] 
-
-  createAt  DateTime @default(now())
-  updateAt  DateTime @updatedAt // Utilizando @updatedAt para atualização automática do timestamp
-
+  id Int @id @default(autoincrement())
+  name String
+  phone String?
+  email String?
+  userID Int @default(1)
+  user User @relation(fields: [userID], references: [id])
+  product Product[] 
   @@map("clients")
 }
 
 model Product {
-  id           Int      @id @default(autoincrement())
-  name         String
-  status       String   @default("Disponivel")
-  supplier     String   @default("Não informado")
-  description  String?
-  code         String?  @default("") // Adicionado valor padrão para evitar problemas com dados nulos
-  selling_price Float    // Mantido como NOT NULL, mas precisa ser tratado no fluxo de criação
-  cost_price   Float    @default(0)
-  clientID     Int
-  client       Client   @relation(fields: [clientID], references: [id])
-  userID       Int      // Removido o valor padrão @default(1)
-  user         User     @relation(fields: [userID], references: [id])
-
-  createAt     DateTime @default(now())
-  updateAt     DateTime @updatedAt // Utilizando @updatedAt para atualização automática do timestamp
-
+  id Int @id @default(autoincrement())
+  name String
+  status String @default("Disponivel")
+  supplier String @default("Não informado")
+  description String?
+  product_code String?
+  price Float
+  cost_price Float @default(0)
+  clientID Int 
+  client Client @relation(fields: [clientID], references: [id])
+  userID Int @default(1)
+  user User @relation(fields: [userID], references: [id])
+  updateAt DateTime @default(now())
+  createAt DateTime @default(now())
   @@map("products")
 }
