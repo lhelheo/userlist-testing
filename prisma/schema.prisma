@@ -54,3 +54,5 @@ model Product {
 
   @@map("products")
 }
+
+// test
