@@ -19,6 +19,9 @@ model User {
   role Role @default(USER)
   clients Client[]
   products Product[]
+  
+  updateAt DateTime @default(now())
+  createAt DateTime @default(now())
   @@map("users")
 }
 
@@ -29,7 +32,9 @@ model Client {
   email String?
   userID Int @default(1)
   user User @relation(fields: [userID], references: [id])
-  product Product[] 
+  products Product[] 
+  updateAt DateTime @default(now())
+  createAt DateTime @default(now())
   @@map("clients")
 }
 
@@ -39,8 +44,8 @@ model Product {
   status String @default("Disponivel")
   supplier String @default("Não informado")
   description String?
-  product_code String?
-  price Float
+  code String?
+  selling_price Float
   cost_price Float @default(0)
   clientID Int 
   client Client @relation(fields: [clientID], references: [id])
