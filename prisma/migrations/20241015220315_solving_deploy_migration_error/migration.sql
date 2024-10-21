@@ -1,0 +1,11 @@
+-- AlterTable
+ALTER TABLE "clients" ALTER COLUMN "userID" DROP DEFAULT,
+ALTER COLUMN "updateAt" DROP DEFAULT;
+
+-- AlterTable
+ALTER TABLE "products" ALTER COLUMN "userID" DROP DEFAULT,
+ALTER COLUMN "updateAt" DROP DEFAULT,
+ALTER COLUMN "code" SET DEFAULT '';
+
+-- AlterTable
+ALTER TABLE "users" ALTER COLUMN "updateAt" DROP DEFAULT;
