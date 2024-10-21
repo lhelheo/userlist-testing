@@ -9,8 +9,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g = Object.create((typeof Iterator === "function" ? Iterator : Object).prototype);
+    return g.next = verb(0), g["throw"] = verb(1), g["return"] = verb(2), typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.editOneClient = exports.createOneClient = exports.deleteOneClient = exports.getAllClients = void 0;
+exports.editClient = exports.createClient = exports.deleteClient = exports.getAllClients = void 0;
 var prisma_1 = require("../libs/prisma");
 var getAllClients = function () { return __awaiter(void 0, void 0, void 0, function () {
     var clients;
@@ -44,7 +44,7 @@ var getAllClients = function () { return __awaiter(void 0, void 0, void 0, funct
         switch (_a.label) {
             case 0: return [4 /*yield*/, prisma_1.prisma.client.findMany({
                     include: {
-                        product: true
+                        products: true
                     }
                 })];
             case 1:
@@ -54,7 +54,7 @@ var getAllClients = function () { return __awaiter(void 0, void 0, void 0, funct
     });
 }); };
 exports.getAllClients = getAllClients;
-var deleteOneClient = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+var deleteClient = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var id, client, error_1;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -65,14 +65,14 @@ var deleteOneClient = function (req, res) { return __awaiter(void 0, void 0, voi
                 _a.trys.push([1, 6, , 7]);
                 return [4 /*yield*/, prisma_1.prisma.client.findUnique({
                         where: { id: Number(id) },
-                        include: { product: true }
+                        include: { products: true }
                     })];
             case 2:
                 client = _a.sent();
                 if (!client) {
                     return [2 /*return*/, res.status(404).json({ error: "Client not found" })];
                 }
-                if (!(client.product.length > 0)) return [3 /*break*/, 4];
+                if (!(client.products.length > 0)) return [3 /*break*/, 4];
                 return [4 /*yield*/, prisma_1.prisma.product.deleteMany({
                         where: { clientID: Number(id) }
                     })];
@@ -94,8 +94,8 @@ var deleteOneClient = function (req, res) { return __awaiter(void 0, void 0, voi
         }
     });
 }); };
-exports.deleteOneClient = deleteOneClient;
-var createOneClient = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+exports.deleteClient = deleteClient;
+var createClient = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var existingClient, user, error_2;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -127,8 +127,8 @@ var createOneClient = function (req, res) { return __awaiter(void 0, void 0, voi
                 return [4 /*yield*/, prisma_1.prisma.product.create({
                         data: {
                             name: req.body.productName,
-                            price: req.body.productPrice,
-                            product_code: req.body.productCode,
+                            selling_price: req.body.productPrice,
+                            code: req.body.productCode,
                             clientID: user.id
                         }
                     })];
@@ -146,8 +146,8 @@ var createOneClient = function (req, res) { return __awaiter(void 0, void 0, voi
         }
     });
 }); };
-exports.createOneClient = createOneClient;
-var editOneClient = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+exports.createClient = createClient;
+var editClient = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var id, client, updatedClient, error_3;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -184,4 +184,4 @@ var editOneClient = function (req, res) { return __awaiter(void 0, void 0, void 
         }
     });
 }); };
-exports.editOneClient = editOneClient;
+exports.editClient = editClient;

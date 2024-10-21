@@ -9,8 +9,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g = Object.create((typeof Iterator === "function" ? Iterator : Object).prototype);
+    return g.next = verb(0), g["throw"] = verb(1), g["return"] = verb(2), typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
@@ -36,10 +36,12 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.editOneProduct = exports.deleteOneProduct = exports.getAllProducts = exports.createOneProduct = exports.addProductToClient = void 0;
+exports.editProduct = exports.deleteProduct = exports.getOneProduct = exports.getAllProducts = exports.createProduct = exports.addProduct = void 0;
+var client_1 = require("@prisma/client");
 var prisma_1 = require("../libs/prisma");
-var addProductToClient = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var id, user, product, error_1;
+// add product to a auth user
+var addProduct = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var id, client, product, error_1;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -48,22 +50,27 @@ var addProductToClient = function (req, res) { return __awaiter(void 0, void 0, 
             case 1:
                 _a.trys.push([1, 4, , 5]);
                 return [4 /*yield*/, prisma_1.prisma.client.findUnique({
-                        where: {
-                            id: Number(id)
-                        }
+                        where: { id: Number(id) }
                     })];
             case 2:
-                user = _a.sent();
-                if (!user) {
+                client = _a.sent();
+                if (!client) {
                     return [2 /*return*/, res.status(404).json({ error: "Client not found" })];
                 }
                 return [4 /*yield*/, prisma_1.prisma.product.create({
                         data: {
                             name: req.body.name,
-                            price: req.body.price,
-                            product_code: req.body.productCode,
+                            selling_price: req.body.price,
+                            cost_price: req.body.cost_price,
+                            code: req.body.productCode,
+                            supplier: req.body.supplier,
+                            status: req.body.status,
+                            description: req.body.description,
                             client: {
-                                connect: { id: user.id }
+                                connect: { id: Number(id) }
+                            },
+                            user: {
+                                connect: { id: req.body.userID || 1 }
                             }
                         }
                     })];
@@ -73,21 +80,21 @@ var addProductToClient = function (req, res) { return __awaiter(void 0, void 0, 
                 return [3 /*break*/, 5];
             case 4:
                 error_1 = _a.sent();
-                res.status(500).json({ error: "Failed to add product to client" });
+                res.status(500).json({ error: "Failed to add product" });
                 return [3 /*break*/, 5];
             case 5: return [2 /*return*/];
         }
     });
 }); };
-exports.addProductToClient = addProductToClient;
-var createOneProduct = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+exports.addProduct = addProduct;
+var createProduct = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var product;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0: return [4 /*yield*/, prisma_1.prisma.product.create({
                     data: {
                         name: req.body.name,
-                        price: req.body.price,
+                        selling_price: req.body.price,
                         client: {
                             connect: { id: req.body.clientId }
                         }
@@ -99,12 +106,15 @@ var createOneProduct = function (req, res) { return __awaiter(void 0, void 0, vo
         }
     });
 }); };
-exports.createOneProduct = createOneProduct;
+exports.createProduct = createProduct;
+// get all products from user auth
 var getAllProducts = function () { return __awaiter(void 0, void 0, void 0, function () {
     var products;
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0: return [4 /*yield*/, prisma_1.prisma.product.findMany()];
+            case 0: return [4 /*yield*/, prisma_1.prisma.product.findMany({
+                    include: { client: true }
+                })];
             case 1:
                 products = _a.sent();
                 return [2 /*return*/, products];
@@ -112,7 +122,23 @@ var getAllProducts = function () { return __awaiter(void 0, void 0, void 0, func
     });
 }); };
 exports.getAllProducts = getAllProducts;
-var deleteOneProduct = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+var getOneProduct = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var product;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, prisma_1.prisma.product.findUnique({
+                    where: { id: Number(req.params.id) },
+                    include: { client: true }
+                })];
+            case 1:
+                product = _a.sent();
+                res.json(product);
+                return [2 /*return*/];
+        }
+    });
+}); };
+exports.getOneProduct = getOneProduct;
+var deleteProduct = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var id, error_2;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -136,34 +162,48 @@ var deleteOneProduct = function (req, res) { return __awaiter(void 0, void 0, vo
         }
     });
 }); };
-exports.deleteOneProduct = deleteOneProduct;
-var editOneProduct = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var id, product, error_3;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
+exports.deleteProduct = deleteProduct;
+var editProduct = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var id, _a, name, price, description, product_code, cost_price, supplier, status, product, error_3;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
             case 0:
                 id = req.params.id;
-                _a.label = 1;
+                _a = req.body, name = _a.name, price = _a.price, description = _a.description, product_code = _a.product_code, cost_price = _a.cost_price, supplier = _a.supplier, status = _a.status;
+                if (!name || price === undefined || !product_code) {
+                    return [2 /*return*/, res.status(400).json({ error: "Nome, preço e código do produto são obrigatórios." })];
+                }
+                _b.label = 1;
             case 1:
-                _a.trys.push([1, 3, , 4]);
+                _b.trys.push([1, 3, , 4]);
                 return [4 /*yield*/, prisma_1.prisma.product.update({
                         where: { id: Number(id) },
                         data: {
-                            name: req.body.name,
-                            price: req.body.price,
-                            product_code: req.body.productCode
+                            name: name,
+                            selling_price: parseFloat(price),
+                            description: description || null,
+                            code: product_code || null,
+                            cost_price: cost_price ? parseFloat(cost_price) : undefined,
+                            supplier: supplier || null,
+                            status: status || 'Disponível',
                         }
                     })];
             case 2:
-                product = _a.sent();
+                product = _b.sent();
                 res.json(product);
                 return [3 /*break*/, 4];
             case 3:
-                error_3 = _a.sent();
-                res.status(500).json({ error: "Failed to edit product" });
+                error_3 = _b.sent();
+                console.error('Error editing product:', error_3);
+                if (error_3 instanceof client_1.Prisma.PrismaClientKnownRequestError) {
+                    if (error_3.code === 'P2025') {
+                        return [2 /*return*/, res.status(404).json({ error: "Produto não encontrado." })];
+                    }
+                }
+                res.status(500).json({ error: "Falha ao editar o produto" });
                 return [3 /*break*/, 4];
             case 4: return [2 /*return*/];
         }
     });
 }); };
-exports.editOneProduct = editOneProduct;
+exports.editProduct = editProduct;

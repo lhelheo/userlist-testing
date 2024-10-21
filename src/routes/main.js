@@ -9,8 +9,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g = Object.create((typeof Iterator === "function" ? Iterator : Object).prototype);
+    return g.next = verb(0), g["throw"] = verb(1), g["return"] = verb(2), typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
@@ -40,12 +40,15 @@ exports.mainRouter = void 0;
 var express_1 = require("express");
 var client_1 = require("../services/client");
 var product_1 = require("../services/product");
+var prisma_1 = require("../libs/prisma");
+var user_1 = require("../controllers/user");
+var auth_1 = require("../middlewares/auth");
 exports.mainRouter = (0, express_1.Router)();
 exports.mainRouter.get("/", function (req, res) {
     res.json("Hello, world!");
 });
-exports.mainRouter.post("/client", client_1.createOneClient);
-exports.mainRouter.get("/client", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+exports.mainRouter.post("/client", client_1.createClient);
+exports.mainRouter.get("/clients", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var clients;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -57,9 +60,9 @@ exports.mainRouter.get("/client", function (req, res) { return __awaiter(void 0,
         }
     });
 }); });
-exports.mainRouter.delete("/client/:id", client_1.deleteOneClient);
-exports.mainRouter.post("/client/:id/product", product_1.addProductToClient);
-exports.mainRouter.get("/product", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+exports.mainRouter.delete("/client/:id", client_1.deleteClient);
+exports.mainRouter.post("/client/:id/product", product_1.addProduct);
+exports.mainRouter.get("/products", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var products;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -71,7 +74,27 @@ exports.mainRouter.get("/product", function (req, res) { return __awaiter(void 0
         }
     });
 }); });
-exports.mainRouter.post("/product", product_1.createOneProduct);
-exports.mainRouter.delete("/product/:id", product_1.deleteOneProduct);
-exports.mainRouter.put("/product/:id", product_1.editOneProduct);
-exports.mainRouter.put("/product/:id/client", client_1.editOneClient);
+exports.mainRouter.post("/product", product_1.createProduct);
+exports.mainRouter.delete("/product/:id", product_1.deleteProduct);
+exports.mainRouter.put("/product/:id", product_1.editProduct);
+exports.mainRouter.put("/product/:id/client", client_1.editClient);
+exports.mainRouter.get("/client/:id", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var client;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, prisma_1.prisma.client.findUnique({
+                    where: { id: Number(req.params.id) },
+                    include: { products: true }
+                })];
+            case 1:
+                client = _a.sent();
+                res.json(client);
+                return [2 /*return*/];
+        }
+    });
+}); });
+exports.mainRouter.get("/product/:id", product_1.getOneProduct);
+exports.mainRouter.post("/register", user_1.register);
+exports.mainRouter.post("/login", user_1.login);
+exports.mainRouter.delete("/user/:username", auth_1.auth.private, user_1.deleteUserByUsername);
+exports.mainRouter.get("/list", auth_1.auth.private, user_1.list); // This route is protected by the auth middleware
