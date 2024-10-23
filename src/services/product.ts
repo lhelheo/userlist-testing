@@ -17,9 +17,9 @@ export const addProduct = async (req: Request, res: Response) => {
         const product = await prisma.product.create({
             data: {
                 name: req.body.name,
-                selling_price: req.body.price,
+                price: req.body.price,
                 cost_price: req.body.cost_price,
-                code: req.body.productCode,
+                product_code: req.body.productCode,
                 supplier: req.body.supplier,
                 status: req.body.status,
                 description: req.body.description,
@@ -42,7 +42,7 @@ export const createProduct = async (req: Request, res: Response) => {
     const product = await prisma.product.create({
         data: {
             name: req.body.name,
-            selling_price: req.body.price,
+            price: req.body.price,
             client: {
                 connect: { id: req.body.clientId }
             }
@@ -101,9 +101,9 @@ export const editProduct = async (req: Request, res: Response) => {
             where: { id: Number(id) },
             data: {
                 name,
-                selling_price: parseFloat(price),
+                price: parseFloat(price),
                 description: description || null,
-                code: product_code || null,
+                product_code: product_code || null,
                 cost_price: cost_price ? parseFloat(cost_price) : undefined,
                 supplier: supplier || null,
                 status: status || 'Disponível', 

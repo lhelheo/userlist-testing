@@ -28,7 +28,7 @@ mainRouter.put("/product/:id/client", editClient);
 mainRouter.get("/client/:id", async (req, res) => {
     const client = await prisma.client.findUnique({
         where: { id: Number(req.params.id) },
-        include: { products: true }
+        include: { product: true }
     });
     res.json(client);
 });

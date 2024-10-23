@@ -3,7 +3,7 @@ import { prisma } from "../libs/prisma";
 export const getAllClients = async () => {
     const clients = await prisma.client.findMany({
         include: {
-            products: true
+            product: true
         }
     });
     return clients;
@@ -14,14 +14,14 @@ export const deleteClient = async (req: any, res: any) => {
     try {
         const client = await prisma.client.findUnique({
             where: { id: Number(id) },
-            include: { products: true }
+            include: { product: true }
         });
 
         if (!client) {
             return res.status(404).json({ error: "Client not found" });
         }
 
-        if (client.products.length > 0) {
+        if (client.product.length > 0) {
             await prisma.product.deleteMany({
                 where: { clientID: Number(id) }
             });
@@ -63,8 +63,8 @@ export const createClient = async (req: any, res: any) => {
             await prisma.product.create({
                 data: {
                     name: req.body.productName,
-                    selling_price: req.body.productPrice,
-                    code: req.body.productCode,
+                    price: req.body.productPrice,
+                    product_code: req.body.productCode,
                     clientID: user.id
                 }
             });

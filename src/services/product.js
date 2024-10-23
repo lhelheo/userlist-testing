@@ -9,8 +9,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g = Object.create((typeof Iterator === "function" ? Iterator : Object).prototype);
-    return g.next = verb(0), g["throw"] = verb(1), g["return"] = verb(2), typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
@@ -60,9 +60,9 @@ var addProduct = function (req, res) { return __awaiter(void 0, void 0, void 0, 
                 return [4 /*yield*/, prisma_1.prisma.product.create({
                         data: {
                             name: req.body.name,
-                            selling_price: req.body.price,
+                            price: req.body.price,
                             cost_price: req.body.cost_price,
-                            code: req.body.productCode,
+                            product_code: req.body.productCode,
                             supplier: req.body.supplier,
                             status: req.body.status,
                             description: req.body.description,
@@ -94,7 +94,7 @@ var createProduct = function (req, res) { return __awaiter(void 0, void 0, void 
             case 0: return [4 /*yield*/, prisma_1.prisma.product.create({
                     data: {
                         name: req.body.name,
-                        selling_price: req.body.price,
+                        price: req.body.price,
                         client: {
                             connect: { id: req.body.clientId }
                         }
@@ -180,9 +180,9 @@ var editProduct = function (req, res) { return __awaiter(void 0, void 0, void 0,
                         where: { id: Number(id) },
                         data: {
                             name: name,
-                            selling_price: parseFloat(price),
+                            price: parseFloat(price),
                             description: description || null,
-                            code: product_code || null,
+                            product_code: product_code || null,
                             cost_price: cost_price ? parseFloat(cost_price) : undefined,
                             supplier: supplier || null,
                             status: status || 'Disponível',
