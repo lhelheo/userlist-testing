@@ -38,7 +38,7 @@ export const deleteClient = async (req: any, res: any) => {
 }
 
 export const createClient = async (req: any, res: any) => {
-    if (!req.body.name || !req.body.email || !req.body.phone) {
+    if (!req.body.name || !req.body.phone) {
         return res.status(400).json({ error: "Missing required fields" });
     }
     
