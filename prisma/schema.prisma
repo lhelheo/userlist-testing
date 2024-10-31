@@ -20,6 +20,9 @@ model User {
   clients Client[]
   products Product[]
 
+  updateAt DateTime @default(now())
+  createAt DateTime @default(now())
+
   @@map("users")
 }
 
@@ -31,6 +34,9 @@ model Client {
   userID Int @default(1)
   user User @relation(fields: [userID], references: [id])
   product Product[] 
+
+  updateAt DateTime @default(now())
+  createAt DateTime @default(now())
 
   @@map("clients")
 }
