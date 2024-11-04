@@ -43,13 +43,11 @@ export const createProduct = async (req: Request, res: Response) => {
         data: {
             name: req.body.name,
             price: req.body.price,
-            client: {
-                connect: { id: req.body.clientId }
-            }
+            ...(req.body.clientId && { client: { connect: { id: req.body.clientId } } })
         }
-    })
+    });
     return product;
-}
+};
 
 // get all products from user auth
 export const getAllProducts = async () => {
