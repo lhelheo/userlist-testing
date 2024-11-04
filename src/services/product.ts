@@ -6,12 +6,15 @@ import { Request, Response } from "express";
 export const addProduct = async (req: Request, res: Response) => {
     const { id } = req.params;
     try {
-        const client = await prisma.client.findUnique({
-            where: { id: Number(id) }
-        });
+        let client = null;
+        if (id) {
+            client = await prisma.client.findUnique({
+                where: { id: Number(id) }
+            });
 
-        if (!client) {
-            return res.status(404).json({ error: "Client not found" });
+            if (!client) {
+                return res.status(404).json({ error: "Client not found" });
+            }
         }
 
         const product = await prisma.product.create({
@@ -23,11 +26,9 @@ export const addProduct = async (req: Request, res: Response) => {
                 supplier: req.body.supplier,
                 status: req.body.status,
                 description: req.body.description,
-                client: {
-                    connect: { id: Number(id) }
-                },
+                ...(client && { client: { connect: { id: Number(id) } } }),
                 user: {
-                    connect: { id: req.body.userID || 1 } 
+                    connect: { id: req.body.userID || 1 }
                 }
             }
         });
