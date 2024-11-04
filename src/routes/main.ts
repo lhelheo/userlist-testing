@@ -16,7 +16,8 @@ mainRouter.get("/clients", async (req, res) => {
     res.json(clients);
 });
 mainRouter.delete("/client/:id", deleteClient);
-mainRouter.post("/client/:id/product", addProduct);
+mainRouter.post("/client/:id/product", addProduct);  // Com cliente associado
+mainRouter.post("/product", addProduct);             // Sem cliente associado
 mainRouter.get("/products", async (req, res) => {
     const products = await getAllProducts();
     res.json(products);
