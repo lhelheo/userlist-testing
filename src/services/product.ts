@@ -123,3 +123,58 @@ export const editProduct = async (req: Request, res: Response) => {
         res.status(500).json({ error: "Falha ao editar o produto" });
     }
 };
+
+export const processPayment = async (req: Request, res: Response) => {
+    const { clientId } = req.params;
+    const { productId, paymentAmount } = req.body;
+
+    if (!paymentAmount || paymentAmount <= 0) {
+        return res.status(400).json({ error: "Insira um valor de pagamento válido." });
+    }
+
+    try {
+        const client = await prisma.client.findUnique({
+            where: { id: Number(clientId) },
+        });
+        if (!client) {
+            return res.status(404).json({ error: "Cliente não encontrado." });
+        }
+
+        const product = await prisma.product.findFirst({
+            where: {
+                id: Number(productId),
+                clientID: Number(clientId),
+                status: "Em processamento",
+            },
+        });
+        if (!product) {
+            return res.status(404).json({ error: "Produto não encontrado ou já vendido." });
+        }
+
+        const remainingBalance = product.remaining_balance ?? product.price;
+
+        let newRemainingBalance = remainingBalance - paymentAmount;
+
+        let newStatus = product.status;
+        if (newRemainingBalance <= 0) {
+            newRemainingBalance = 0;
+            newStatus = "Vendido";
+        }
+
+        const updatedProduct = await prisma.product.update({
+            where: { id: Number(productId) },
+            data: {
+                remaining_balance: newRemainingBalance,
+                status: newStatus,
+            },
+        });
+
+        res.json({
+            message: "Pagamento processado com sucesso.",
+            product: updatedProduct,
+        });
+    } catch (error) {
+        console.error("Erro ao processar pagamento:", error);
+        res.status(500).json({ error: "Erro ao processar pagamento." });
+    }
+};
