@@ -90,6 +90,7 @@ export const editProduct = async (req: Request, res: Response) => {
         cost_price,
         supplier,
         status,
+        clientID,
     } = req.body;
 
     if (!name || price === undefined || !product_code) {
@@ -107,6 +108,7 @@ export const editProduct = async (req: Request, res: Response) => {
                 cost_price: cost_price ? parseFloat(cost_price) : undefined,
                 supplier: supplier || null,
                 status: status || 'Disponível', 
+                clientID: clientID || null,
             }
         });
 
