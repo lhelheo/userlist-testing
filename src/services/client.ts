@@ -1,4 +1,5 @@
 import { prisma } from "../libs/prisma";
+import { Request, Response } from "express";
 
 export const getAllClients = async () => {
     const clients = await prisma.client.findMany({
@@ -9,7 +10,7 @@ export const getAllClients = async () => {
     return clients;
 }
 
-export const deleteClient = async (req: any, res: any) => {
+export const deleteClient = async (req: Request, res: Response) => {
     const { id } = req.params;
     try {
         const client = await prisma.client.findUnique({
@@ -37,7 +38,7 @@ export const deleteClient = async (req: any, res: any) => {
     }
 }
 
-export const createClient = async (req: any, res: any) => {
+export const createClient = async (req: Request, res: Response) => {
     if (!req.body.name || !req.body.phone) {
         return res.status(400).json({ error: "Missing required fields" });
     }
@@ -76,7 +77,7 @@ export const createClient = async (req: any, res: any) => {
     }
 };
 
-export const editClient = async (req: any, res: any) => {
+export const editClient = async (req: Request, res: Response) => {
     const { id } = req.params;
     try {
         const client = await prisma.client.findUnique({
@@ -99,5 +100,23 @@ export const editClient = async (req: any, res: any) => {
         res.json(updatedClient);
     } catch (error) {
         res.status(500).json({ error: "Failed to update client" });
+    }
+}
+
+export const getClientProducts = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    try {
+        const client = await prisma.client.findUnique({
+            where: { id: Number(id) },
+            include: { product: true }
+        });
+
+        if (!client) {
+            return res.status(404).json({ error: "Client not found" });
+        }
+
+        res.json(client.product);
+    } catch (error) {
+        res.status(500).json({ error: "Failed to fetch products for client" });
     }
 }

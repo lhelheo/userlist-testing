@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createClient, deleteClient, editClient, getAllClients } from "../services/client";
+import { createClient, deleteClient, editClient, getAllClients, getClientProducts } from "../services/client";
 import { addProduct, createProduct, deleteProduct, editProduct, getAllProducts, getOneProduct, processPayment } from "../services/product";
 import { prisma } from "../libs/prisma";
 import { deleteUserByUsername, list, login, register } from "../controllers/user";
@@ -39,3 +39,4 @@ mainRouter.post("/login", login);
 mainRouter.delete("/user/:username", auth.private, deleteUserByUsername);
 mainRouter.get("/list", auth.private, list); 
 mainRouter.post("/clients/:clientId/products/:productId/payment", processPayment);
+mainRouter.get("/client/:id/products", getClientProducts);
