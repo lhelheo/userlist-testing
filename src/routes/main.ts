@@ -38,5 +38,5 @@ mainRouter.post("/register", register);
 mainRouter.post("/login", login);
 mainRouter.delete("/user/:username", auth.private, deleteUserByUsername);
 mainRouter.get("/list", auth.private, list); 
-mainRouter.post("/clients/:clientId/products/:productId/payment", processPayment);
+mainRouter.post("/client/:id/pay", processPayment);
 mainRouter.get("/client/:id/products", getClientProducts);

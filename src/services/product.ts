@@ -125,56 +125,71 @@ export const editProduct = async (req: Request, res: Response) => {
 };
 
 export const processPayment = async (req: Request, res: Response) => {
-    const { clientId } = req.params;
-    const { productId, paymentAmount } = req.body;
+    const { id } = req.params;
+    const { paymentAmount } = req.body;
 
     if (!paymentAmount || paymentAmount <= 0) {
-        return res.status(400).json({ error: "Insira um valor de pagamento válido." });
+        return res.status(400).json({ error: "Valor de pagamento é obrigatório e deve ser maior que zero." });
     }
 
     try {
-        const client = await prisma.client.findUnique({
-            where: { id: Number(clientId) },
+        // Obtém os produtos do cliente, ordenados por data de criação
+        const products = await prisma.product.findMany({
+            where: { clientID: Number(id), status: { not: 'Vendido' } },
+            orderBy: { createAt: 'asc' },
         });
-        if (!client) {
-            return res.status(404).json({ error: "Cliente não encontrado." });
+
+        if (products.length === 0) {
+            return res.status(404).json({ error: "Nenhum produto pendente encontrado para o cliente." });
         }
 
-        const product = await prisma.product.findFirst({
-            where: {
-                id: Number(productId),
-                clientID: Number(clientId),
-                status: "Em processamento",
-            },
-        });
-        if (!product) {
-            return res.status(404).json({ error: "Produto não encontrado ou já vendido." });
+        let remainingPayment = paymentAmount;
+        let paidProducts = 0;
+
+        for (let product of products) {
+            if (remainingPayment <= 0 || paidProducts >= 2) break;
+
+            const balanceToPay = product.remaining_balance ?? product.price;
+
+            if (remainingPayment >= balanceToPay) {
+                // Pagamento cobre o produto totalmente
+                remainingPayment -= balanceToPay;
+                await prisma.product.update({
+                    where: { id: product.id },
+                    data: {
+                        status: 'Vendido',
+                        remaining_balance: 0,
+                    },
+                });
+                paidProducts++;
+            } else {
+                // Pagamento parcial do produto
+                await prisma.product.update({
+                    where: { id: product.id },
+                    data: {
+                        status: 'Em processamento',
+                        remaining_balance: balanceToPay - remainingPayment,
+                    },
+                });
+                remainingPayment = 0;
+                paidProducts++;
+            }
         }
 
-        const remainingBalance = product.remaining_balance ?? product.price;
-
-        let newRemainingBalance = remainingBalance - paymentAmount;
-
-        let newStatus = product.status;
-        if (newRemainingBalance <= 0) {
-            newRemainingBalance = 0;
-            newStatus = "Vendido";
+        if (paidProducts === 0) {
+            return res.status(400).json({ error: "Valor insuficiente para cobrir o pagamento de qualquer produto." });
         }
 
-        const updatedProduct = await prisma.product.update({
-            where: { id: Number(productId) },
-            data: {
-                remaining_balance: newRemainingBalance,
-                status: newStatus,
-            },
-        });
+        if (paidProducts > 2) {
+            return res.status(400).json({ error: "Pagamento não pode cobrir mais de dois produtos de uma vez." });
+        }
 
-        res.json({
-            message: "Pagamento processado com sucesso.",
-            product: updatedProduct,
-        });
+        res.status(200).json({ message: "Pagamento processado com sucesso." });
     } catch (error) {
-        console.error("Erro ao processar pagamento:", error);
-        res.status(500).json({ error: "Erro ao processar pagamento." });
+        console.error('Erro ao processar pagamento:', error);
+        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+            return res.status(404).json({ error: "Cliente ou produto não encontrado." });
+        }
+        res.status(500).json({ error: "Falha ao processar pagamento." });
     }
 };
