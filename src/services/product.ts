@@ -133,7 +133,6 @@ export const processPayment = async (req: Request, res: Response) => {
     }
 
     try {
-        // Obtém os produtos do cliente, ordenados por data de criação
         const products = await prisma.product.findMany({
             where: { clientID: Number(id), status: { not: 'Vendido' } },
             orderBy: { createAt: 'asc' },
@@ -144,47 +143,41 @@ export const processPayment = async (req: Request, res: Response) => {
         }
 
         let remainingPayment = paymentAmount;
-        let paidProducts = 0;
+        const updatedProducts = [];
 
         for (let product of products) {
-            if (remainingPayment <= 0 || paidProducts >= 2) break;
+            if (remainingPayment <= 0) break;
 
-            const balanceToPay = product.remaining_balance ?? product.price;
+            const balanceToPay = product.price;
 
             if (remainingPayment >= balanceToPay) {
-                // Pagamento cobre o produto totalmente
                 remainingPayment -= balanceToPay;
-                await prisma.product.update({
+                const updatedProduct = await prisma.product.update({
                     where: { id: product.id },
                     data: {
                         status: 'Vendido',
-                        remaining_balance: 0,
+                        price: 0,
                     },
                 });
-                paidProducts++;
+                updatedProducts.push(updatedProduct);
             } else {
-                // Pagamento parcial do produto
-                await prisma.product.update({
+                const updatedProduct = await prisma.product.update({
                     where: { id: product.id },
                     data: {
                         status: 'Em processamento',
-                        remaining_balance: balanceToPay - remainingPayment,
+                        price: balanceToPay - remainingPayment,
                     },
                 });
+                updatedProducts.push(updatedProduct);
                 remainingPayment = 0;
-                paidProducts++;
             }
         }
 
-        if (paidProducts === 0) {
+        if (updatedProducts.length === 0) {
             return res.status(400).json({ error: "Valor insuficiente para cobrir o pagamento de qualquer produto." });
         }
 
-        if (paidProducts > 2) {
-            return res.status(400).json({ error: "Pagamento não pode cobrir mais de dois produtos de uma vez." });
-        }
-
-        res.status(200).json({ message: "Pagamento processado com sucesso." });
+        res.status(200).json({ message: "Pagamento processado com sucesso.", updatedProducts });
     } catch (error) {
         console.error('Erro ao processar pagamento:', error);
         if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
