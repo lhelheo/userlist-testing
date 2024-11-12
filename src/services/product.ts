@@ -133,20 +133,24 @@ export const processPayment = async (req: Request, res: Response) => {
     }
 
     try {
+        console.log(`Payment: ${payment}`);
+        console.log(`Client ID: ${clientId}`);
+    
         const products = await prisma.product.findMany({
             where: { clientID: Number(clientId) },
             take: 2
         });
-
+        console.log('Products found:', products);
+    
         if (products.length === 0) {
             return res.status(404).json({ error: "No products found for this client" });
         }
-
+        
         const updatedProducts = await Promise.all(products.map(async (product) => {
             if (payment > product.price) {
                 throw new Error("Payment exceeds product price");
             }
-
+    
             return await prisma.product.update({
                 where: { id: product.id },
                 data: {
@@ -154,9 +158,10 @@ export const processPayment = async (req: Request, res: Response) => {
                 }
             });
         }));
-
+    
         res.json(updatedProducts);
     } catch (error: any) {
+        console.error('Error:', error);
         if (error.message === "Payment exceeds product price") {
             return res.status(400).json({ error: error.message });
         }
