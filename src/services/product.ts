@@ -125,7 +125,7 @@ export const editProduct = async (req: Request, res: Response) => {
 };
 
 export const processPayment = async (req: Request, res: Response) => {
-    const { id } = req.params;
+    const { clientId } = req.params;
     const { payment } = req.body;
 
     if (!payment || payment <= 0) {
@@ -133,27 +133,33 @@ export const processPayment = async (req: Request, res: Response) => {
     }
 
     try {
-        const product = await prisma.product.findUnique({
-            where: { id: Number(id) }
+        const products = await prisma.product.findMany({
+            where: { clientID: Number(clientId) },
+            take: 2
         });
 
-        if (!product) {
-            return res.status(404).json({ error: "Product not found" });
+        if (products.length === 0) {
+            return res.status(404).json({ error: "No products found for this client" });
         }
 
-        if (payment > product.price) {
-            return res.status(400).json({ error: "Payment exceeds product price" });
-        }
-
-        const updatedProduct = await prisma.product.update({
-            where: { id: Number(id) },
-            data: {
-                price: product.price - payment
+        const updatedProducts = await Promise.all(products.map(async (product) => {
+            if (payment > product.price) {
+                throw new Error("Payment exceeds product price");
             }
-        });
 
-        res.json(updatedProduct);
-    } catch (error) {
+            return await prisma.product.update({
+                where: { id: product.id },
+                data: {
+                    price: product.price - payment
+                }
+            });
+        }));
+
+        res.json(updatedProducts);
+    } catch (error: any) {
+        if (error.message === "Payment exceeds product price") {
+            return res.status(400).json({ error: error.message });
+        }
         res.status(500).json({ error: "Failed to process payment" });
     }
 };
