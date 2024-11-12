@@ -128,40 +128,47 @@ export const processPayment = async (req: Request, res: Response) => {
     const { clientId } = req.params;
     const { payment } = req.body;
 
+    console.log("Client ID:", clientId);
+    console.log("Payment Amount:", payment);
+
     if (!payment || payment <= 0) {
+        console.error("Invalid payment amount");
         return res.status(400).json({ error: "Invalid payment amount" });
     }
 
     try {
-        console.log(`Payment: ${payment}`);
-        console.log(`Client ID: ${clientId}`);
-    
         const products = await prisma.product.findMany({
             where: { clientID: Number(clientId) },
             take: 2
         });
-        console.log('Products found:', products);
-    
+
+        console.log("Products found:", products);
+
         if (products.length === 0) {
+            console.error("No products found for this client");
             return res.status(404).json({ error: "No products found for this client" });
         }
-        
+
         const updatedProducts = await Promise.all(products.map(async (product) => {
+            console.log(`Processing product: ${product.name}, Price: ${product.price}`);
             if (payment > product.price) {
                 throw new Error("Payment exceeds product price");
             }
-    
-            return await prisma.product.update({
+
+            const updatedProduct = await prisma.product.update({
                 where: { id: product.id },
                 data: {
                     price: product.price - payment
                 }
             });
+
+            console.log(`Updated product: ${updatedProduct.name}, New Price: ${updatedProduct.price}`);
+            return updatedProduct;
         }));
-    
+
         res.json(updatedProducts);
     } catch (error: any) {
-        console.error('Error:', error);
+        console.error("Error processing payment:", error.message);
         if (error.message === "Payment exceeds product price") {
             return res.status(400).json({ error: error.message });
         }
