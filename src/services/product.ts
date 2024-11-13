@@ -125,53 +125,55 @@ export const editProduct = async (req: Request, res: Response) => {
 };
 
 export const processPayment = async (req: Request, res: Response) => {
-    const { clientId } = req.params;
-    const { payment } = req.body;
+    const { id } = req.params;
+    const { paymentValue } = req.body;
 
-    console.log("Client ID:", clientId);
-    console.log("Payment Amount:", payment);
+    const client = await prisma.client.findUnique({
+        where: { id: Number(id) }
+    });
 
-    if (!payment || payment <= 0) {
-        console.error("Invalid payment amount");
-        return res.status(400).json({ error: "Invalid payment amount" });
+    if (!client) {
+        return res.status(404).json({ error: "Cliente não encontrado" });
     }
 
-    try {
-        const products = await prisma.product.findMany({
-            where: { clientID: Number(clientId) },
-            take: 2
-        });
+    const products = await prisma.product.findMany({
+        where: { clientID: Number(id), status: { not: 'Vendido' } },
+        take: 2,
+        orderBy: { createAt: 'asc' }
+    });
+    
+    if (products.length === 0) {
+        return res.status(404).json({ error: "Nenhum produto encontrado" });
+    }
 
-        console.log("Products found:", products);
-
-        if (products.length === 0) {
-            console.error("No products found for this client");
-            return res.status(404).json({ error: "No products found for this client" });
+    let reamingPayment = paymentValue;
+    for (const product of products) {
+        if (reamingPayment <= 0) {
+            break;
         }
 
-        const updatedProducts = await Promise.all(products.map(async (product) => {
-            console.log(`Processing product: ${product.name}, Price: ${product.price}`);
-            if (payment > product.price) {
-                throw new Error("Payment exceeds product price");
+        const outstandingBalance = product.remaining_balance ?? product.price;
+
+        const paymentForProduct = Math.min(reamingPayment, outstandingBalance);
+        reamingPayment = reamingPayment - paymentForProduct;
+
+        const newBalance = outstandingBalance - paymentForProduct;
+        await prisma.product.update({
+            where: { id: product.id },
+            data: {
+                remaining_balance: newBalance,
+                status: newBalance <= 0 ? 'Vendido' : 'Disponível'
             }
-
-            const updatedProduct = await prisma.product.update({
-                where: { id: product.id },
-                data: {
-                    price: product.price - payment
-                }
-            });
-
-            console.log(`Updated product: ${updatedProduct.name}, New Price: ${updatedProduct.price}`);
-            return updatedProduct;
-        }));
-
-        res.json(updatedProducts);
-    } catch (error: any) {
-        console.error("Error processing payment:", error.message);
-        if (error.message === "Payment exceeds product price") {
-            return res.status(400).json({ error: error.message });
-        }
-        res.status(500).json({ error: "Failed to process payment" });
+        });
     }
-};
+
+    const updatedProducts = await prisma.product.findMany({
+        where: { clientID: Number(id) }
+    });
+
+    res.json({
+        message: "Pagamento processado com sucesso",
+        reamingPayment,
+        products: updatedProducts
+    })
+}
