@@ -43,3 +43,6 @@ mainRouter.get("/client/:id/products", getClientProducts);
 mainRouter.get("/client/:id/pay", (req, res) => {
     res.send("Rota encontrada.");
 });
+mainRouter.get("/client/:clientId/product/:productId/pay", (req, res) => {
+    res.send("Rota encontrada.");
+});

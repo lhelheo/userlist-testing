@@ -177,3 +177,58 @@ export const processPayment = async (req: Request, res: Response) => {
         products: updatedProducts
     })
 }
+
+export const payForProduct = async (req: Request, res: Response) => {
+    const { clientId, productId } = req.params; // Recebendo o ID do cliente e do produto
+    const { amount } = req.body; // Recebendo o valor a ser pago do corpo da requisição
+
+    if (!amount || amount <= 0) {
+        return res.status(400).json({ error: "Payment amount must be greater than 0." });
+    }
+
+    try {
+        // Buscar o cliente para validar sua existência
+        const client = await prisma.client.findUnique({
+            where: { id: Number(clientId) },
+        });
+
+        if (!client) {
+            return res.status(404).json({ error: "Client not found." });
+        }
+
+        // Buscar o produto associado ao cliente
+        const product = await prisma.product.findFirst({
+            where: {
+                id: Number(productId),
+                clientID: Number(clientId),
+            },
+        });
+
+        if (!product) {
+            return res.status(404).json({ error: "Product not found for this client." });
+        }
+
+        // Verificar o saldo restante do produto
+        const remainingBalance = product.remaining_balance ?? product.price;
+
+        if (amount > remainingBalance) {
+            return res.status(400).json({ 
+                error: "Payment amount exceeds the remaining balance for this product." 
+            });
+        }
+
+        // Atualizar o saldo restante e o status do produto
+        const updatedProduct = await prisma.product.update({
+            where: { id: Number(productId) },
+            data: {
+                remaining_balance: remainingBalance - amount,
+                status: remainingBalance - amount === 0 ? "Vendido" : "Em processamento",
+            },
+        });
+
+        res.json({ message: "Payment applied successfully.", product: updatedProduct });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Failed to process payment for the product." });
+    }
+};
