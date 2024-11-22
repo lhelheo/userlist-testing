@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { createClient, deleteClient, editClient, getAllClients, getClientProducts } from "../services/client";
-import { addProduct, createProduct, deleteProduct, editProduct, getAllProducts, getOneProduct, processPayment } from "../services/product";
+import { addProduct, createProduct, deleteProduct, editProduct, getAllProducts, getOneProduct, payForProduct, processPayment } from "../services/product";
 import { prisma } from "../libs/prisma";
 import { deleteUserByUsername, list, login, register } from "../controllers/user";
 import { auth } from "../middlewares/auth";
@@ -43,6 +43,4 @@ mainRouter.get("/client/:id/products", getClientProducts);
 mainRouter.get("/client/:id/pay", (req, res) => {
     res.send("Rota encontrada.");
 });
-mainRouter.patch("/client/:clientId/product/:productId/pay", (req, res) => {
-    res.send("Rota encontrada.");
-});
+mainRouter.patch("/client/:clientId/product/:productId/pay", payForProduct);
