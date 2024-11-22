@@ -179,15 +179,15 @@ export const processPayment = async (req: Request, res: Response) => {
 }
 
 export const payForProduct = async (req: Request, res: Response) => {
-    const { clientId, productId } = req.params; // Recebendo o ID do cliente e do produto
-    const { amount } = req.body; // Recebendo o valor a ser pago do corpo da requisição
+    const { clientId, productId } = req.params; // IDs do cliente e do produto
+    const { amount } = req.body; // Valor do pagamento
 
     if (!amount || amount <= 0) {
         return res.status(400).json({ error: "Payment amount must be greater than 0." });
     }
 
     try {
-        // Buscar o cliente para validar sua existência
+        // Verificar a existência do cliente
         const client = await prisma.client.findUnique({
             where: { id: Number(clientId) },
         });
@@ -196,7 +196,7 @@ export const payForProduct = async (req: Request, res: Response) => {
             return res.status(404).json({ error: "Client not found." });
         }
 
-        // Buscar o produto associado ao cliente
+        // Verificar a existência do produto associado ao cliente
         const product = await prisma.product.findFirst({
             where: {
                 id: Number(productId),
@@ -208,10 +208,14 @@ export const payForProduct = async (req: Request, res: Response) => {
             return res.status(404).json({ error: "Product not found for this client." });
         }
 
-        // Verificar o saldo restante do produto
-        const remainingBalance = product.remaining_balance ?? product.price;
+        // Inicializar o saldo restante (remaining_balance) com o valor do preço, se estiver 0
+        let remainingBalance = product.remaining_balance;
+        if (remainingBalance === 0) {
+            remainingBalance = product.price;
+        }
 
-        if (amount > remainingBalance) {
+        // Validar se o valor do pagamento não excede o saldo restante
+        if (remainingBalance && amount > remainingBalance) {
             return res.status(400).json({ 
                 error: "Payment amount exceeds the remaining balance for this product." 
             });
@@ -221,8 +225,8 @@ export const payForProduct = async (req: Request, res: Response) => {
         const updatedProduct = await prisma.product.update({
             where: { id: Number(productId) },
             data: {
-                remaining_balance: remainingBalance - amount,
-                status: remainingBalance - amount === 0 ? "Vendido" : "Em processamento",
+                remaining_balance: (remainingBalance ?? 0) - amount,
+                status: (remainingBalance ?? 0) - amount === 0 ? "Vendido" : "Em processamento",
             },
         });
 
