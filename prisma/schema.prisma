@@ -49,8 +49,8 @@ model Product {
   description       String?
   product_code      String?
   price             Float
-  cost_price        Float?  
-  remaining_balance Float?
+  cost_price        Float?   // Removido o @default que estava tentando usar o valor de price
+  remaining_balance Float?   // Removido o @default que estava tentando usar o valor de price
   clientID          Int?
   client            Client?  @relation(fields: [clientID], references: [id])
   userID            Int      @default(1)
