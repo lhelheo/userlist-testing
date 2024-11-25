@@ -42,21 +42,21 @@ model Client {
 }
 
 model Product {
-  id          Int      @id @default(autoincrement())
-  name        String
-  status      String   @default("Disponivel")
-  supplier    String   @default("Não informado")
-  description String?
-  product_code String?
-  price       Float
-  cost_price  Float    @default(dbgenerated("price"))
+  id                Int      @id @default(autoincrement())
+  name              String
+  status            String   @default("Disponivel")
+  supplier          String   @default("Não informado")
+  description       String?
+  product_code      String?
+  price             Float
+  cost_price        Float?  
   remaining_balance Float?
-  clientID    Int?
-  client      Client?  @relation(fields: [clientID], references: [id])
-  userID      Int      @default(1)
-  user        User     @relation(fields: [userID], references: [id])
+  clientID          Int?
+  client            Client?  @relation(fields: [clientID], references: [id])
+  userID            Int      @default(1)
+  user              User     @relation(fields: [userID], references: [id])
 
-  updateAt    DateTime @default(now())
-  createAt    DateTime @default(now())
+  updateAt          DateTime @default(now())
+  createAt          DateTime @default(now())
   @@map("products")
 }
