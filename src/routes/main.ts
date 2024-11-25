@@ -40,7 +40,4 @@ mainRouter.delete("/user/:username", auth.private, deleteUserByUsername);
 mainRouter.get("/list", auth.private, list); 
 mainRouter.patch("/client/:id/pay", processPayment);
 mainRouter.get("/client/:id/products", getClientProducts);
-mainRouter.get("/client/:id/pay", (req, res) => {
-    res.send("Rota encontrada.");
-});
 mainRouter.patch("/client/:clientId/product/:productId/pay", payForProduct);

@@ -179,14 +179,15 @@ export const processPayment = async (req: Request, res: Response) => {
 }
 
 export const payForProduct = async (req: Request, res: Response) => {
-    const { clientId, productId } = req.params; 
-    const { amount } = req.body; 
+    const { clientId, productId } = req.params;
+    const { amount } = req.body;
 
     if (!amount || amount <= 0) {
         return res.status(400).json({ error: "Payment amount must be greater than 0." });
     }
 
     try {
+        // Encontra o cliente
         const client = await prisma.client.findUnique({
             where: { id: Number(clientId) },
         });
@@ -195,6 +196,7 @@ export const payForProduct = async (req: Request, res: Response) => {
             return res.status(404).json({ error: "Client not found." });
         }
 
+        // Encontra o produto associado ao cliente
         const product = await prisma.product.findFirst({
             where: {
                 id: Number(productId),
@@ -206,22 +208,29 @@ export const payForProduct = async (req: Request, res: Response) => {
             return res.status(404).json({ error: "Product not found for this client." });
         }
 
-        const remainingBalance = product.remaining_balance ?? product.price;
+        // Verifica se o remaining_balance está indefinido. Se estiver, inicializa com o valor de price.
+        let remainingBalance = product.remaining_balance ?? product.price;
 
+        // Valida se o valor do pagamento é superior ao saldo restante
         if (amount > remainingBalance) {
             return res.status(400).json({ 
                 error: "Payment amount exceeds the remaining balance for this product." 
             });
         }
 
+        // Subtrai o valor do pagamento do saldo restante
+        remainingBalance -= amount;
+
+        // Atualiza o status e o saldo restante do produto
         const updatedProduct = await prisma.product.update({
             where: { id: Number(productId) },
             data: {
-                remaining_balance: remainingBalance - amount,
-                status: remainingBalance - amount === 0 ? "Vendido" : "Em processamento",
+                remaining_balance: remainingBalance,
+                status: remainingBalance === 0 ? "Vendido" : "Em processamento",
             },
         });
 
+        // Retorna uma resposta de sucesso
         res.json({ message: "Payment applied successfully.", product: updatedProduct });
     } catch (error) {
         console.error(error);
