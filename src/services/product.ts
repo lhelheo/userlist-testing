@@ -1,8 +1,6 @@
-import { Prisma } from "@prisma/client";
 import { prisma } from "../libs/prisma";
 import { Request, Response } from "express";
 
-// add product to a auth user
 export const addProduct = async (req: Request, res: Response) => {
     const { id } = req.params; 
     try {
@@ -14,7 +12,7 @@ export const addProduct = async (req: Request, res: Response) => {
             });
 
             if (!client) {
-                return res.status(404).json({ error: "Client not found" });
+                return res.status(404).json({ error: "Cliente não encontrado" });
             }
         }
 
@@ -36,7 +34,7 @@ export const addProduct = async (req: Request, res: Response) => {
 
         res.json(product);
     } catch (error) {
-        res.status(500).json({ error: "Failed to add product" });
+        res.status(500).json({ error: "Falha ao criar um produto" });
     }
 };
 
@@ -51,7 +49,6 @@ export const createProduct = async (req: Request, res: Response) => {
     return product;
 };
 
-// get all products from user auth
 export const getAllProducts = async () => {
     const products = await prisma.product.findMany({
         include: { client: true }
@@ -73,9 +70,9 @@ export const deleteProduct = async (req: Request, res: Response) => {
         await prisma.product.delete({
             where: { id: Number(id) }
         });
-        res.json({ message: "Product deleted successfully" });
+        res.json({ message: "Produto deletado com sucesso" });
     } catch (error) {
-        res.status(500).json({ error: "Failed to delete product" });
+        res.status(500).json({ error: "Falha ao deletar um produto" });
     }
 }
 
@@ -114,11 +111,9 @@ export const editProduct = async (req: Request, res: Response) => {
 
         res.json(product);
     } catch (error) {
-        console.error('Error editing product:', error);
-        if (error instanceof Prisma.PrismaClientKnownRequestError) {
-            if (error.code === 'P2025') {
-                return res.status(404).json({ error: "Produto não encontrado." });
-            }
+        console.error('Erro ao tentar editar produto:', error);
+        if ((error as any).code === 'P2025') {
+            return res.status(404).json({ error: "Produto não encontrado" });
         }
         res.status(500).json({ error: "Falha ao editar o produto" });
     }
@@ -183,20 +178,18 @@ export const payForProduct = async (req: Request, res: Response) => {
     const { amount } = req.body;
 
     if (!amount || amount <= 0) {
-        return res.status(400).json({ error: "Payment amount must be greater than 0." });
+        return res.status(400).json({ error: "Pagamento deve ser maior que 0." });
     }
 
     try {
-        // Encontra o cliente
         const client = await prisma.client.findUnique({
             where: { id: Number(clientId) },
         });
 
         if (!client) {
-            return res.status(404).json({ error: "Client not found." });
+            return res.status(404).json({ error: "Cliente não encontrado." });
         }
 
-        // Encontra o produto associado ao cliente
         const product = await prisma.product.findFirst({
             where: {
                 id: Number(productId),
@@ -208,20 +201,16 @@ export const payForProduct = async (req: Request, res: Response) => {
             return res.status(404).json({ error: "Product not found for this client." });
         }
 
-        // Verifica se o remaining_balance está indefinido. Se estiver, inicializa com o valor de price.
         let remainingBalance = product.remaining_balance ?? product.price;
 
-        // Valida se o valor do pagamento é superior ao saldo restante
         if (amount > remainingBalance) {
             return res.status(400).json({ 
-                error: "Payment amount exceeds the remaining balance for this product." 
+                error: "Pagamento excede o valor do produto." 
             });
         }
 
-        // Subtrai o valor do pagamento do saldo restante
         remainingBalance -= amount;
 
-        // Atualiza o status e o saldo restante do produto
         const updatedProduct = await prisma.product.update({
             where: { id: Number(productId) },
             data: {
@@ -230,10 +219,9 @@ export const payForProduct = async (req: Request, res: Response) => {
             },
         });
 
-        // Retorna uma resposta de sucesso
-        res.json({ message: "Payment applied successfully.", product: updatedProduct });
+        res.json({ message: "Pagamento realizado com sucesso.", product: updatedProduct });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: "Failed to process payment for the product." });
+        res.status(500).json({ error: "Falha ao realizar pagamento de um produto." });
     }
 };
