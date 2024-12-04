@@ -198,7 +198,7 @@ export const payForProduct = async (req: Request, res: Response) => {
         });
 
         if (!product) {
-            return res.status(404).json({ error: "Product not found for this client." });
+            return res.status(404).json({ error: "Produto não encontrado para esse cliente." });
         }
 
         let remainingBalance = product.remaining_balance ?? product.price;
