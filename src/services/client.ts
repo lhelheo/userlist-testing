@@ -1,16 +1,46 @@
 import { prisma } from "../libs/prisma";
 import { Request, Response } from "express";
 
-export const getAllClients = async () => {
-    const clients = await prisma.client.findMany({
-        include: {
-            product: true
+export const getAllClients = async (req: Request, res: Response) => {
+    try {
+        const clients = await prisma.client.findMany({
+            include: { product: true }
+        })
+
+        if (req && res) {
+            res.json(clients);
         }
-    });
-    return clients;
+        else {
+            return clients;
+        }
+    }
+    catch (error) {
+        console.error('Erro ao tentar buscar clientes:', error);
+        return [];
+    }
 }
 
-export const deleteClient = async (req: Request, res: Response) => {
+export const getClientById = async (req: Request, res: Response) => {
+    try {
+        const client = await prisma.client.findUnique({
+            where: { id: Number(req.params.id) },
+            include: { product: true }
+        })
+
+        if (req && res) {
+            res.json(client);
+        }
+        else {
+            return client;
+        }
+    }
+    catch (error) {
+        console.error('Erro ao tentar buscar cliente:', error);
+        return null;
+    }
+}
+    
+export const deleteClientById = async (req: Request, res: Response) => {
     const { id } = req.params;
     try {
         const client = await prisma.client.findUnique({
@@ -77,7 +107,7 @@ export const createClient = async (req: Request, res: Response) => {
     }
 };
 
-export const editClient = async (req: Request, res: Response) => {
+export const updateClientById = async (req: Request, res: Response) => {
     const { id } = req.params;
     try {
         const client = await prisma.client.findUnique({
@@ -103,7 +133,7 @@ export const editClient = async (req: Request, res: Response) => {
     }
 }
 
-export const getClientProducts = async (req: Request, res: Response) => {
+export const getProductsByClientId = async (req: Request, res: Response) => {
     const { id } = req.params;
     try {
         const client = await prisma.client.findUnique({

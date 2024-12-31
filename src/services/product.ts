@@ -1,7 +1,7 @@
 import { prisma } from "../libs/prisma";
 import { Request, Response } from "express";
 
-export const addProduct = async (req: Request, res: Response) => {
+export const addProductToClient = async (req: Request, res: Response) => {
     const { id } = req.params; 
     try {
         let client = null;
@@ -49,14 +49,26 @@ export const createProduct = async (req: Request, res: Response) => {
     return product;
 };
 
-export const getAllProducts = async () => {
-    const products = await prisma.product.findMany({
-        include: { client: true }
-    });
-    return products;
+export const getAllProducts = async (req: Request, res: Response) => {
+    try {
+        const products = await prisma.product.findMany({
+            include: { client: true }
+        })
+
+        if (req && res) {
+            res.json(products);
+        }
+        else {
+            return products;
+        }
+    }
+    catch (error) {
+        console.error('Erro ao tentar buscar produtos:', error);
+        return [];
+    }
 }
 
-export const getOneProduct = async (req: Request, res: Response) => {
+export const getProductById = async (req: Request, res: Response) => {
     const product = await prisma.product.findUnique({
         where: { id: Number(req.params.id) },
         include: { client: true }
@@ -64,7 +76,7 @@ export const getOneProduct = async (req: Request, res: Response) => {
     res.json(product);
 }
 
-export const deleteProduct = async (req: Request, res: Response) => {
+export const deleteProductById = async (req: Request, res: Response) => {
     const { id } = req.params;
     try {
         await prisma.product.delete({
@@ -76,7 +88,7 @@ export const deleteProduct = async (req: Request, res: Response) => {
     }
 }
 
-export const editProduct = async (req: Request, res: Response) => {
+export const updateProductById = async (req: Request, res: Response) => {
     const { id } = req.params;
 
     const {
@@ -119,7 +131,7 @@ export const editProduct = async (req: Request, res: Response) => {
     }
 };
 
-export const processPayment = async (req: Request, res: Response) => {
+export const processClientPayment = async (req: Request, res: Response) => {
     const { id } = req.params;
     const { paymentValue } = req.body;
 
@@ -173,7 +185,7 @@ export const processPayment = async (req: Request, res: Response) => {
     })
 }
 
-export const payForProduct = async (req: Request, res: Response) => {
+export const processProductPaymentByClient = async (req: Request, res: Response) => {
     const { clientId, productId } = req.params;
     const { amount } = req.body;
 

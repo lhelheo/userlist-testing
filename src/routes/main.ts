@@ -1,43 +1,27 @@
 import { Router } from "express";
-import { createClient, deleteClient, editClient, getAllClients, getClientProducts } from "../services/client";
-import { addProduct, createProduct, deleteProduct, editProduct, getAllProducts, getOneProduct, payForProduct, processPayment } from "../services/product";
+import { createClient, deleteClientById, getAllClients, getClientById, getProductsByClientId, updateClientById } from "../services/client";
+import { addProductToClient, createProduct, deleteProductById, getAllProducts, getProductById, processClientPayment, processProductPaymentByClient, updateProductById } from "../services/product";
 import { prisma } from "../libs/prisma";
 import { deleteUserByUsername, list, login, register } from "../controllers/user";
 import { auth } from "../middlewares/auth";
 
 export const mainRouter = Router();
 
-mainRouter.get("/", (req, res) => {
-    res.json("Hello, world!");
-})
-mainRouter.post("/client", createClient);
-mainRouter.get("/clients", async (req, res) => {
-    const clients = await getAllClients();
-    res.json(clients);
-});
-mainRouter.delete("/client/:id", deleteClient);
-mainRouter.post("/client/:id/product", addProduct);  // Com cliente associado
-mainRouter.post("/product", addProduct);             // Sem cliente associado
-mainRouter.get("/products", async (req, res) => {
-    const products = await getAllProducts();
-    res.json(products);
-})
-mainRouter.post("/product", createProduct);
-mainRouter.delete("/product/:id", deleteProduct);
-mainRouter.put("/product/:id", editProduct);
-mainRouter.put("/product/:id/client", editClient);
-mainRouter.get("/client/:id", async (req, res) => {
-    const client = await prisma.client.findUnique({
-        where: { id: Number(req.params.id) },
-        include: { product: true }
-    });
-    res.json(client);
-});
-mainRouter.get("/product/:id", getOneProduct);
+mainRouter.post("/clients", createClient);
+mainRouter.get("/clients", getAllClients);
+mainRouter.get("/clients/:id", getClientById);
+mainRouter.delete("/clients/:id", deleteClientById);
+mainRouter.post("/clients/:id/product", addProductToClient);  // Com cliente 
+mainRouter.post("/products", createProduct);             // Sem cliente 
+mainRouter.get("/products", getAllProducts);
+mainRouter.delete("/products/:id", deleteProductById);
+mainRouter.put("/products/:id", updateProductById);
+mainRouter.put("/products/:id/client", updateClientById);
+mainRouter.get("/products/:id", getProductById);
 mainRouter.post("/register", register);
 mainRouter.post("/login", login);
 mainRouter.delete("/user/:username", auth.private, deleteUserByUsername);
 mainRouter.get("/list", auth.private, list); 
-mainRouter.patch("/client/:id/pay", processPayment);
-mainRouter.get("/client/:id/products", getClientProducts);
-mainRouter.patch("/client/:clientId/product/:productId/pay", payForProduct);
+mainRouter.patch("/clients/:id/pay", processClientPayment);
+mainRouter.get("/clients/:id/products", getProductsByClientId);
+mainRouter.patch("/clients/:clientId/products/:productId/pay", processProductPaymentByClient);
