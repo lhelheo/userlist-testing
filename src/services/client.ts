@@ -150,3 +150,5 @@ export const getProductsByClientId = async (req: Request, res: Response) => {
         res.status(500).json({ error: "Failed to fetch products for client" });
     }
 }
+
+// teste
