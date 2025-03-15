@@ -26,10 +26,10 @@ export const register = async (req: Request, res: Response) => {
             )
             return res.status(201).json({ id: newUser.id, username: newUser.username, token });
         } else {
-            return res.status(400).json({ message: "User already exists" });
+            return res.status(400).json({ message: "Usuário já existe" });
         }
     }
-    return res.status(400).json({ message: "Invalid data" });
+    return res.status(400).json({ message: "Credenciais inválidas" });
 }
 
 export const login = async (req: Request, res: Response) => {
