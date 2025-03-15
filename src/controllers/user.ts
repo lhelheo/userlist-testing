@@ -51,13 +51,13 @@ export const login = async (req: Request, res: Response) => {
                 );
                 return res.status(200).json({ status: true, token });
             } else {
-                return res.status(401).json({ message: "Invalid credentials" });
+                return res.status(401).json({ message: "Credenciais inválidas" });
             }
         } else {
-            return res.status(404).json({ message: "User not found" });
+            return res.status(404).json({ message: "Usuário não encontrado" });
         }
     }
-    return res.status(400).json({ status: false, message: "Invalid data" });
+    return res.status(400).json({ status: false, message: "Dados inválidos" });
 };
 
 export const list = async (req: Request, res: Response) => {
